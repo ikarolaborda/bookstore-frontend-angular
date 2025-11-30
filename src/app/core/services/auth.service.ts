@@ -63,7 +63,7 @@ export class AuthService {
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, request).pipe(
       tap(response => {
-        this.saveToStorage(response.token, response.user);
+        this.saveToStorage(response.accessToken, response.user);
       }),
       catchError(error => {
         console.error('Login failed:', error);
@@ -75,7 +75,7 @@ export class AuthService {
   register(request: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, request).pipe(
       tap(response => {
-        this.saveToStorage(response.token, response.user);
+        this.saveToStorage(response.accessToken, response.user);
       }),
       catchError(error => {
         console.error('Registration failed:', error);
@@ -87,7 +87,7 @@ export class AuthService {
   refresh(): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh`, {}).pipe(
       tap(response => {
-        this.saveToStorage(response.token, response.user);
+        this.saveToStorage(response.accessToken, response.user);
       }),
       catchError(error => {
         console.error('Token refresh failed:', error);

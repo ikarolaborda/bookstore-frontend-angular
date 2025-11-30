@@ -3,3 +3,4 @@ export * from './book.model';
 export * from './author.model';
 export * from './store.model';
 export * from './user.model';
+export * from './pagination.model';
