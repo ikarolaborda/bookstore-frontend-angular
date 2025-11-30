@@ -1,11 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { BooksService } from '../books.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { SearchInputComponent } from '../../../shared/components/search-input/search-input.component';
 import { Book } from '../../../shared/models';
 
 @Component({
@@ -14,10 +15,11 @@ import { Book } from '../../../shared/models';
   imports: [
     CommonModule,
     RouterLink,
-    FormsModule,
     CurrencyPipe,
     LoadingSpinnerComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    PaginationComponent,
+    SearchInputComponent
   ],
   templateUrl: './book-list.component.html'
 })
@@ -33,18 +35,36 @@ export class BookListComponent implements OnInit {
     this.booksService.loadBooks();
   }
 
-  onSearch(): void {
-    const query = this.searchQuery();
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query);
     if (query.trim()) {
-      this.booksService.searchByTitle(query);
+      this.booksService.searchByTitle(query, 0, this.booksService.pageSize());
     } else {
-      this.booksService.loadBooks();
+      this.booksService.loadBooks(0, this.booksService.pageSize());
     }
   }
 
-  clearSearch(): void {
+  onSearchClear(): void {
     this.searchQuery.set('');
-    this.booksService.loadBooks();
+    this.booksService.loadBooks(0, this.booksService.pageSize());
+  }
+
+  onPageChange(page: number): void {
+    const query = this.searchQuery();
+    if (query.trim()) {
+      this.booksService.searchByTitle(query, page, this.booksService.pageSize());
+    } else {
+      this.booksService.loadBooks(page, this.booksService.pageSize());
+    }
+  }
+
+  onPageSizeChange(size: number): void {
+    const query = this.searchQuery();
+    if (query.trim()) {
+      this.booksService.searchByTitle(query, 0, size);
+    } else {
+      this.booksService.loadBooks(0, size);
+    }
   }
 
   openDeleteDialog(book: Book): void {
@@ -59,6 +79,7 @@ export class BookListComponent implements OnInit {
         next: () => {
           this.deleteDialogOpen.set(false);
           this.bookToDelete.set(null);
+          this.booksService.refreshCurrentPage();
         },
         error: (err) => {
           console.error('Delete failed:', err);

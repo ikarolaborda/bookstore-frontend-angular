@@ -1,17 +1,25 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { AuthorsService } from '../authors.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { SearchInputComponent } from '../../../shared/components/search-input/search-input.component';
 import { Author } from '../../../shared/models';
 
 @Component({
   selector: 'app-author-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, LoadingSpinnerComponent, ConfirmationDialogComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    LoadingSpinnerComponent,
+    ConfirmationDialogComponent,
+    PaginationComponent,
+    SearchInputComponent
+  ],
   templateUrl: './author-list.component.html'
 })
 export class AuthorListComponent implements OnInit {
@@ -26,18 +34,36 @@ export class AuthorListComponent implements OnInit {
     this.authorsService.loadAuthors();
   }
 
-  onSearch(): void {
-    const query = this.searchQuery();
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query);
     if (query.trim()) {
-      this.authorsService.searchByName(query);
+      this.authorsService.searchByName(query, 0, this.authorsService.pageSize());
     } else {
-      this.authorsService.loadAuthors();
+      this.authorsService.loadAuthors(0, this.authorsService.pageSize());
     }
   }
 
-  clearSearch(): void {
+  onSearchClear(): void {
     this.searchQuery.set('');
-    this.authorsService.loadAuthors();
+    this.authorsService.loadAuthors(0, this.authorsService.pageSize());
+  }
+
+  onPageChange(page: number): void {
+    const query = this.searchQuery();
+    if (query.trim()) {
+      this.authorsService.searchByName(query, page, this.authorsService.pageSize());
+    } else {
+      this.authorsService.loadAuthors(page, this.authorsService.pageSize());
+    }
+  }
+
+  onPageSizeChange(size: number): void {
+    const query = this.searchQuery();
+    if (query.trim()) {
+      this.authorsService.searchByName(query, 0, size);
+    } else {
+      this.authorsService.loadAuthors(0, size);
+    }
   }
 
   openDeleteDialog(author: Author): void {
@@ -52,6 +78,7 @@ export class AuthorListComponent implements OnInit {
         next: () => {
           this.deleteDialogOpen.set(false);
           this.authorToDelete.set(null);
+          this.authorsService.refreshCurrentPage();
         }
       });
     }
