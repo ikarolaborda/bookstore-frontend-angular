@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Author, AuthorRequest } from '../../shared/models';
+import { Author, AuthorRequest, PageResponse, DEFAULT_PAGE_SIZE } from '../../shared/models';
 
 @Injectable({
   providedIn: 'root'
@@ -11,26 +11,61 @@ export class AuthorsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/authors`;
 
-  private authorsSignal = signal<Author[]>([]);
+  private pageResponseSignal = signal<PageResponse<Author> | null>(null);
   private selectedAuthorSignal = signal<Author | null>(null);
   private loadingSignal = signal(false);
   private errorSignal = signal<string | null>(null);
 
-  readonly authors = this.authorsSignal.asReadonly();
+  readonly pageResponse = this.pageResponseSignal.asReadonly();
+  readonly authors = computed(() => this.pageResponseSignal()?.content || []);
   readonly selectedAuthor = this.selectedAuthorSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
-  readonly authorsCount = computed(() => this.authorsSignal().length);
 
-  loadAuthors(): void {
+  readonly currentPage = computed(() => this.pageResponseSignal()?.page || 0);
+  readonly pageSize = computed(() => this.pageResponseSignal()?.size || DEFAULT_PAGE_SIZE);
+  readonly totalElements = computed(() => this.pageResponseSignal()?.totalElements || 0);
+  readonly totalPages = computed(() => this.pageResponseSignal()?.totalPages || 0);
+  readonly isFirst = computed(() => this.pageResponseSignal()?.first ?? true);
+  readonly isLast = computed(() => this.pageResponseSignal()?.last ?? true);
+
+  loadAuthors(page = 0, size = DEFAULT_PAGE_SIZE, sortBy = 'name', sortDir: 'asc' | 'desc' = 'asc'): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.http.get<Author[]>(this.apiUrl).pipe(
-      tap(authors => this.authorsSignal.set(authors)),
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sortBy', sortBy)
+      .set('sortDir', sortDir);
+
+    this.http.get<PageResponse<Author>>(this.apiUrl, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
       finalize(() => this.loadingSignal.set(false))
     ).subscribe({
       error: (err) => this.errorSignal.set(err.error?.message || 'Failed to load authors')
+    });
+  }
+
+  searchByName(name: string, page = 0, size = DEFAULT_PAGE_SIZE): void {
+    if (!name.trim()) {
+      this.loadAuthors(page, size);
+      return;
+    }
+
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const params = new HttpParams()
+      .set('name', name)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    this.http.get<PageResponse<Author>>(`${this.apiUrl}/search`, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
+      finalize(() => this.loadingSignal.set(false))
+    ).subscribe({
+      error: (err) => this.errorSignal.set(err.error?.message || 'Search failed')
     });
   }
 
@@ -42,25 +77,9 @@ export class AuthorsService {
     );
   }
 
-  searchByName(name: string): void {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-
-    const params = new HttpParams().set('name', name);
-    this.http.get<Author[]>(`${this.apiUrl}/search`, { params }).pipe(
-      tap(authors => this.authorsSignal.set(authors)),
-      finalize(() => this.loadingSignal.set(false))
-    ).subscribe({
-      error: (err) => this.errorSignal.set(err.error?.message || 'Search failed')
-    });
-  }
-
   create(request: AuthorRequest): Observable<Author> {
     this.loadingSignal.set(true);
     return this.http.post<Author>(this.apiUrl, request).pipe(
-      tap(author => {
-        this.authorsSignal.update(authors => [...authors, author]);
-      }),
       finalize(() => this.loadingSignal.set(false))
     );
   }
@@ -69,9 +88,6 @@ export class AuthorsService {
     this.loadingSignal.set(true);
     return this.http.put<Author>(`${this.apiUrl}/${id}`, request).pipe(
       tap(updatedAuthor => {
-        this.authorsSignal.update(authors =>
-          authors.map(author => author.id === id ? updatedAuthor : author)
-        );
         this.selectedAuthorSignal.set(updatedAuthor);
       }),
       finalize(() => this.loadingSignal.set(false))
@@ -81,14 +97,21 @@ export class AuthorsService {
   delete(id: number): Observable<void> {
     this.loadingSignal.set(true);
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => {
-        this.authorsSignal.update(authors => authors.filter(author => author.id !== id));
-      }),
       finalize(() => this.loadingSignal.set(false))
     );
   }
 
   clearSelectedAuthor(): void {
     this.selectedAuthorSignal.set(null);
+  }
+
+  clearError(): void {
+    this.errorSignal.set(null);
+  }
+
+  refreshCurrentPage(): void {
+    const currentPage = this.currentPage();
+    const currentSize = this.pageSize();
+    this.loadAuthors(currentPage, currentSize);
   }
 }

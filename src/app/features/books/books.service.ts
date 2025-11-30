@@ -2,7 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Book, BookRequest } from '../../shared/models';
+import { Book, BookRequest, PageResponse, DEFAULT_PAGE_SIZE } from '../../shared/models';
 
 @Injectable({
   providedIn: 'root'
@@ -11,26 +11,61 @@ export class BooksService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/books`;
 
-  private booksSignal = signal<Book[]>([]);
+  private pageResponseSignal = signal<PageResponse<Book> | null>(null);
   private selectedBookSignal = signal<Book | null>(null);
   private loadingSignal = signal(false);
   private errorSignal = signal<string | null>(null);
 
-  readonly books = this.booksSignal.asReadonly();
+  readonly pageResponse = this.pageResponseSignal.asReadonly();
+  readonly books = computed(() => this.pageResponseSignal()?.content || []);
   readonly selectedBook = this.selectedBookSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
-  readonly booksCount = computed(() => this.booksSignal().length);
 
-  loadBooks(): void {
+  readonly currentPage = computed(() => this.pageResponseSignal()?.page || 0);
+  readonly pageSize = computed(() => this.pageResponseSignal()?.size || DEFAULT_PAGE_SIZE);
+  readonly totalElements = computed(() => this.pageResponseSignal()?.totalElements || 0);
+  readonly totalPages = computed(() => this.pageResponseSignal()?.totalPages || 0);
+  readonly isFirst = computed(() => this.pageResponseSignal()?.first ?? true);
+  readonly isLast = computed(() => this.pageResponseSignal()?.last ?? true);
+
+  loadBooks(page = 0, size = DEFAULT_PAGE_SIZE, sortBy = 'title', sortDir: 'asc' | 'desc' = 'asc'): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.http.get<Book[]>(this.apiUrl).pipe(
-      tap(books => this.booksSignal.set(books)),
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sortBy', sortBy)
+      .set('sortDir', sortDir);
+
+    this.http.get<PageResponse<Book>>(this.apiUrl, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
       finalize(() => this.loadingSignal.set(false))
     ).subscribe({
       error: (err) => this.errorSignal.set(err.error?.message || 'Failed to load books')
+    });
+  }
+
+  searchByTitle(title: string, page = 0, size = DEFAULT_PAGE_SIZE): void {
+    if (!title.trim()) {
+      this.loadBooks(page, size);
+      return;
+    }
+
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const params = new HttpParams()
+      .set('title', title)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    this.http.get<PageResponse<Book>>(`${this.apiUrl}/search`, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
+      finalize(() => this.loadingSignal.set(false))
+    ).subscribe({
+      error: (err) => this.errorSignal.set(err.error?.message || 'Search failed')
     });
   }
 
@@ -42,47 +77,44 @@ export class BooksService {
     );
   }
 
-  searchByTitle(title: string): void {
+  getByAuthorId(authorId: number, page = 0, size = DEFAULT_PAGE_SIZE): void {
     this.loadingSignal.set(true);
-    this.errorSignal.set(null);
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
 
-    const params = new HttpParams().set('title', title);
-    this.http.get<Book[]>(`${this.apiUrl}/search`, { params }).pipe(
-      tap(books => this.booksSignal.set(books)),
-      finalize(() => this.loadingSignal.set(false))
-    ).subscribe({
-      error: (err) => this.errorSignal.set(err.error?.message || 'Search failed')
-    });
-  }
-
-  getByAuthorId(authorId: number): void {
-    this.loadingSignal.set(true);
-    this.http.get<Book[]>(`${this.apiUrl}/author/${authorId}`).pipe(
-      tap(books => this.booksSignal.set(books)),
+    this.http.get<PageResponse<Book>>(`${this.apiUrl}/author/${authorId}`, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
       finalize(() => this.loadingSignal.set(false))
     ).subscribe({
       error: (err) => this.errorSignal.set(err.error?.message || 'Failed to load books')
     });
   }
 
-  getByStoreId(storeId: number): void {
+  getByStoreId(storeId: number, page = 0, size = DEFAULT_PAGE_SIZE): void {
     this.loadingSignal.set(true);
-    this.http.get<Book[]>(`${this.apiUrl}/store/${storeId}`).pipe(
-      tap(books => this.booksSignal.set(books)),
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    this.http.get<PageResponse<Book>>(`${this.apiUrl}/store/${storeId}`, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
       finalize(() => this.loadingSignal.set(false))
     ).subscribe({
       error: (err) => this.errorSignal.set(err.error?.message || 'Failed to load books')
     });
   }
 
-  getByPriceRange(minPrice: number, maxPrice: number): void {
+  getByPriceRange(minPrice: number, maxPrice: number, page = 0, size = DEFAULT_PAGE_SIZE): void {
     this.loadingSignal.set(true);
     const params = new HttpParams()
       .set('minPrice', minPrice.toString())
-      .set('maxPrice', maxPrice.toString());
+      .set('maxPrice', maxPrice.toString())
+      .set('page', page.toString())
+      .set('size', size.toString());
 
-    this.http.get<Book[]>(`${this.apiUrl}/price-range`, { params }).pipe(
-      tap(books => this.booksSignal.set(books)),
+    this.http.get<PageResponse<Book>>(`${this.apiUrl}/price-range`, { params }).pipe(
+      tap(response => this.pageResponseSignal.set(response)),
       finalize(() => this.loadingSignal.set(false))
     ).subscribe({
       error: (err) => this.errorSignal.set(err.error?.message || 'Failed to load books')
@@ -92,9 +124,6 @@ export class BooksService {
   create(request: BookRequest): Observable<Book> {
     this.loadingSignal.set(true);
     return this.http.post<Book>(this.apiUrl, request).pipe(
-      tap(book => {
-        this.booksSignal.update(books => [...books, book]);
-      }),
       finalize(() => this.loadingSignal.set(false))
     );
   }
@@ -103,9 +132,6 @@ export class BooksService {
     this.loadingSignal.set(true);
     return this.http.put<Book>(`${this.apiUrl}/${id}`, request).pipe(
       tap(updatedBook => {
-        this.booksSignal.update(books =>
-          books.map(book => book.id === id ? updatedBook : book)
-        );
         this.selectedBookSignal.set(updatedBook);
       }),
       finalize(() => this.loadingSignal.set(false))
@@ -115,9 +141,6 @@ export class BooksService {
   delete(id: number): Observable<void> {
     this.loadingSignal.set(true);
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => {
-        this.booksSignal.update(books => books.filter(book => book.id !== id));
-      }),
       finalize(() => this.loadingSignal.set(false))
     );
   }
@@ -128,5 +151,11 @@ export class BooksService {
 
   clearError(): void {
     this.errorSignal.set(null);
+  }
+
+  refreshCurrentPage(): void {
+    const currentPage = this.currentPage();
+    const currentSize = this.pageSize();
+    this.loadBooks(currentPage, currentSize);
   }
 }
