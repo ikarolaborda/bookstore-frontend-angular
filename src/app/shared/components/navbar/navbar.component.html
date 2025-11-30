@@ -1,124 +1,123 @@
-<nav class="bg-indigo-600 shadow-lg">
+<nav class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-16">
-      <div class="flex">
-        <div class="flex-shrink-0 flex items-center">
-          <a routerLink="/books" class="text-white text-xl font-bold">
-            Book Search
-          </a>
-        </div>
-        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+    <div class="flex h-16 items-center justify-between">
+      <div class="flex items-center gap-8">
+        <a routerLink="/books" class="flex items-center gap-2 font-semibold text-lg">
+          <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span class="hidden sm:inline-block">Book Search</span>
+        </a>
+        
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
           <a
             routerLink="/books"
-            routerLinkActive="border-white"
+            routerLinkActive="text-foreground"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="text-white hover:text-indigo-200 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium"
+            class="transition-colors hover:text-foreground/80 text-foreground/60"
           >
             Books
           </a>
           <a
             routerLink="/authors"
-            routerLinkActive="border-white"
+            routerLinkActive="text-foreground"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="text-white hover:text-indigo-200 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium"
+            class="transition-colors hover:text-foreground/80 text-foreground/60"
           >
             Authors
           </a>
           <a
             routerLink="/stores"
-            routerLinkActive="border-white"
+            routerLinkActive="text-foreground"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="text-white hover:text-indigo-200 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium"
+            class="transition-colors hover:text-foreground/80 text-foreground/60"
           >
             Stores
           </a>
           <a
             routerLink="/reports"
-            routerLinkActive="border-white"
+            routerLinkActive="text-foreground"
             [routerLinkActiveOptions]="{ exact: false }"
-            class="text-white hover:text-indigo-200 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium"
+            class="transition-colors hover:text-foreground/80 text-foreground/60"
           >
             Reports
           </a>
           @if (authService.isAdmin()) {
             <a
               routerLink="/users"
-              routerLinkActive="border-white"
+              routerLinkActive="text-foreground"
               [routerLinkActiveOptions]="{ exact: false }"
-              class="text-white hover:text-indigo-200 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium"
+              class="transition-colors hover:text-foreground/80 text-foreground/60"
             >
               Users
             </a>
           }
-        </div>
+        </nav>
       </div>
 
-      <div class="hidden sm:ml-6 sm:flex sm:items-center">
-        <div class="flex items-center space-x-4">
-          <span class="text-white text-sm">
-            {{ authService.userName() }}
-            @if (authService.isAdmin()) {
-              <span class="ml-1 px-2 py-0.5 text-xs bg-yellow-500 text-yellow-900 rounded-full">Admin</span>
-            }
-          </span>
-          <button
-            (click)="logout()"
-            class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            Logout
-          </button>
+      <div class="hidden md:flex items-center gap-4">
+        <div class="flex items-center gap-2 text-sm">
+          <span class="text-muted-foreground">{{ authService.userName() }}</span>
+          @if (authService.isAdmin()) {
+            <app-badge variant="secondary">Admin</app-badge>
+          }
         </div>
-      </div>
-
-      <div class="flex items-center sm:hidden">
-        <button
-          (click)="toggleMobileMenu()"
-          type="button"
-          class="inline-flex items-center justify-center p-2 rounded-md text-indigo-200 hover:text-white hover:bg-indigo-700 focus:outline-none"
-        >
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            @if (mobileMenuOpen()) {
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            } @else {
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            }
+        <app-separator orientation="vertical" class="h-6" />
+        <app-button variant="ghost" size="sm" (click)="logout()">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-        </button>
+          Logout
+        </app-button>
       </div>
+
+      <button
+        (click)="toggleMobileMenu()"
+        type="button"
+        class="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-accent transition-colors"
+      >
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          @if (mobileMenuOpen()) {
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          } @else {
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          }
+        </svg>
+      </button>
     </div>
   </div>
 
   @if (mobileMenuOpen()) {
-    <div class="sm:hidden">
-      <div class="pt-2 pb-3 space-y-1">
+    <div class="md:hidden border-t">
+      <div class="px-4 py-3 space-y-1">
         <a
           routerLink="/books"
-          routerLinkActive="bg-indigo-700"
-          class="text-white block px-3 py-2 text-base font-medium"
+          routerLinkActive="bg-accent"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors"
           (click)="toggleMobileMenu()"
         >
           Books
         </a>
         <a
           routerLink="/authors"
-          routerLinkActive="bg-indigo-700"
-          class="text-white block px-3 py-2 text-base font-medium"
+          routerLinkActive="bg-accent"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors"
           (click)="toggleMobileMenu()"
         >
           Authors
         </a>
         <a
           routerLink="/stores"
-          routerLinkActive="bg-indigo-700"
-          class="text-white block px-3 py-2 text-base font-medium"
+          routerLinkActive="bg-accent"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors"
           (click)="toggleMobileMenu()"
         >
           Stores
         </a>
         <a
           routerLink="/reports"
-          routerLinkActive="bg-indigo-700"
-          class="text-white block px-3 py-2 text-base font-medium"
+          routerLinkActive="bg-accent"
+          class="block px-3 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors"
           (click)="toggleMobileMenu()"
         >
           Reports
@@ -126,24 +125,29 @@
         @if (authService.isAdmin()) {
           <a
             routerLink="/users"
-            routerLinkActive="bg-indigo-700"
-            class="text-white block px-3 py-2 text-base font-medium"
+            routerLinkActive="bg-accent"
+            class="block px-3 py-2 rounded-md text-base font-medium hover:bg-accent transition-colors"
             (click)="toggleMobileMenu()"
           >
             Users
           </a>
         }
       </div>
-      <div class="pt-4 pb-3 border-t border-indigo-700">
-        <div class="px-3">
-          <p class="text-white text-sm font-medium">{{ authService.userName() }}</p>
-          <button
-            (click)="logout()"
-            class="mt-2 w-full bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            Logout
-          </button>
+      <div class="px-4 py-3 border-t">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">{{ authService.userName() }}</span>
+            @if (authService.isAdmin()) {
+              <app-badge variant="secondary">Admin</app-badge>
+            }
+          </div>
         </div>
+        <app-button variant="outline" size="sm" class="w-full" (click)="logout()">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Logout
+        </app-button>
       </div>
     </div>
   }

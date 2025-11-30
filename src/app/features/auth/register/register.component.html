@@ -1,100 +1,100 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-  <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Book Search</h1>
-      <p class="text-gray-600 mt-2">Create your account</p>
-    </div>
-
-    @if (errorMessage()) {
-      <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-        <p class="text-red-600 text-sm">{{ errorMessage() }}</p>
-      </div>
-    }
-
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">
-          Full name
-        </label>
-        <input
-          type="text"
-          id="name"
-          formControlName="name"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          placeholder="John Doe"
-        />
-        @if (registerForm.get('name')?.invalid && registerForm.get('name')?.touched) {
-          <p class="mt-1 text-sm text-red-600">Name must be at least 2 characters.</p>
-        }
-      </div>
-
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">
-          Email address
-        </label>
-        <input
-          type="email"
-          id="email"
-          formControlName="email"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          placeholder="you@example.com"
-        />
-        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
-          <p class="mt-1 text-sm text-red-600">Please enter a valid email address.</p>
-        }
-      </div>
-
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">
-          Password
-        </label>
-        <input
-          type="password"
-          id="password"
-          formControlName="password"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          placeholder="••••••••"
-        />
-        @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
-          <p class="mt-1 text-sm text-red-600">Password must be at least 6 characters.</p>
-        }
-      </div>
-
-      <div>
-        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
-          Confirm password
-        </label>
-        <input
-          type="password"
-          id="confirmPassword"
-          formControlName="confirmPassword"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          placeholder="••••••••"
-        />
-      </div>
-
-      <button
-        type="submit"
-        [disabled]="registerForm.invalid || isLoading()"
-        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        @if (isLoading()) {
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+<div class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <app-card>
+      <app-card-header class="text-center space-y-2">
+        <div class="flex justify-center mb-4">
+          <svg class="h-12 w-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
-          Creating account...
-        } @else {
-          Create account
-        }
-      </button>
-    </form>
+        </div>
+        <app-card-title class="text-2xl">Create an account</app-card-title>
+        <app-card-description>Enter your information to get started</app-card-description>
+      </app-card-header>
 
-    <p class="mt-6 text-center text-sm text-gray-600">
-      Already have an account?
-      <a routerLink="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
-        Sign in here
-      </a>
-    </p>
+      <app-card-content>
+        @if (errorMessage()) {
+          <app-alert variant="destructive" class="mb-6">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <app-alert-description>{{ errorMessage() }}</app-alert-description>
+          </app-alert>
+        }
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
+          <div class="space-y-2">
+            <app-label for="name">Full name</app-label>
+            <app-input
+              type="text"
+              id="name"
+              formControlName="name"
+              placeholder="John Doe"
+            />
+            @if (registerForm.get('name')?.invalid && registerForm.get('name')?.touched) {
+              <p class="text-sm text-destructive">Name must be at least 2 characters.</p>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <app-label for="email">Email address</app-label>
+            <app-input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="you@example.com"
+            />
+            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+              <p class="text-sm text-destructive">Please enter a valid email address.</p>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <app-label for="password">Password</app-label>
+            <app-input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+            />
+            @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+              <p class="text-sm text-destructive">Password must be at least 6 characters.</p>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <app-label for="confirmPassword">Confirm password</app-label>
+            <app-input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <app-button
+            type="submit"
+            [disabled]="registerForm.invalid || isLoading()"
+            class="w-full"
+          >
+            @if (isLoading()) {
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating account...
+            } @else {
+              Create account
+            }
+          </app-button>
+        </form>
+
+        <div class="mt-6 text-center text-sm">
+          <span class="text-muted-foreground">Already have an account?</span>
+          <app-button variant="link" class="h-auto p-0 ml-1" [href]="['/login']">
+            Sign in here
+          </app-button>
+        </div>
+      </app-card-content>
+    </app-card>
   </div>
 </div>
