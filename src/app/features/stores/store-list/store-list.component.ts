@@ -8,6 +8,17 @@ import { ConfirmationDialogComponent } from '../../../shared/components/confirma
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { SearchInputComponent } from '../../../shared/components/search-input/search-input.component';
 import { Store } from '../../../shared/models';
+import {
+  ButtonComponent,
+  CardComponent,
+  CardContentComponent,
+  CardDescriptionComponent,
+  CardFooterComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  AlertComponent,
+  AlertDescriptionComponent,
+} from '../../../shared/ui';
 
 @Component({
   selector: 'app-store-list',
@@ -18,7 +29,16 @@ import { Store } from '../../../shared/models';
     LoadingSpinnerComponent,
     ConfirmationDialogComponent,
     PaginationComponent,
-    SearchInputComponent
+    SearchInputComponent,
+    ButtonComponent,
+    CardComponent,
+    CardContentComponent,
+    CardDescriptionComponent,
+    CardFooterComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    AlertComponent,
+    AlertDescriptionComponent,
   ],
   templateUrl: './store-list.component.html'
 })

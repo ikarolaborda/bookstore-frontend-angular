@@ -1,15 +1,32 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { UsersService } from '../users.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmationDialogComponent } from '../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { User } from '../../../shared/models';
+import {
+  ButtonComponent,
+  CardComponent,
+  CardContentComponent,
+  CardHeaderComponent,
+  CardTitleComponent,
+  BadgeComponent,
+} from '../../../shared/ui';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, LoadingSpinnerComponent, ConfirmationDialogComponent],
+  imports: [
+    CommonModule,
+    LoadingSpinnerComponent,
+    ConfirmationDialogComponent,
+    ButtonComponent,
+    CardComponent,
+    CardContentComponent,
+    CardHeaderComponent,
+    CardTitleComponent,
+    BadgeComponent,
+  ],
   templateUrl: './user-list.component.html'
 })
 export class UserListComponent implements OnInit {
