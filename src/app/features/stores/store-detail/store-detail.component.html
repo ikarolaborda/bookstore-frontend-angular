@@ -1,0 +1,65 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  @if (storesService.isLoading()) {
+    <app-loading-spinner message="Loading store..." containerClass="py-12" />
+  } @else if (storesService.selectedStore(); as store) {
+    <div class="mb-6">
+      <a routerLink="/stores" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Stores
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="p-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ store.name }}</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          @if (store.address) {
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Address</h3>
+              <p class="mt-1 text-lg text-gray-900">{{ store.address }}</p>
+            </div>
+          }
+          @if (store.city) {
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">City</h3>
+              <p class="mt-1 text-lg text-gray-900">{{ store.city }}</p>
+            </div>
+          }
+          @if (store.country) {
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Country</h3>
+              <p class="mt-1 text-lg text-gray-900">{{ store.country }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="mb-8">
+          <a [routerLink]="['/books']" [queryParams]="{storeId: store.id}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+            View books available at this store
+          </a>
+        </div>
+
+        @if (authService.isAdmin()) {
+          <div class="flex space-x-4 pt-6 border-t border-gray-200">
+            <a [routerLink]="['/stores', store.id, 'edit']" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+              Edit Store
+            </a>
+            <button (click)="openDeleteDialog()" class="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50">
+              Delete Store
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Store not found</p>
+      <a routerLink="/stores" class="mt-4 text-indigo-600 hover:text-indigo-800">Return to stores list</a>
+    </div>
+  }
+</div>
+
+<app-confirmation-dialog [isOpen]="deleteDialogOpen()" title="Delete Store" [message]="'Are you sure you want to delete \'' + (storesService.selectedStore()?.name || '') + '\'?'" confirmText="Delete" (confirmed)="confirmDelete()" (cancelled)="cancelDelete()" />

@@ -1,0 +1,137 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="sm:flex sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Books</h1>
+      <p class="mt-1 text-sm text-gray-500">
+        {{ booksService.booksCount() }} books found
+      </p>
+    </div>
+    @if (authService.isAdmin()) {
+      <a
+        routerLink="/books/new"
+        class="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+      >
+        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Book
+      </a>
+    }
+  </div>
+
+  <div class="mb-6">
+    <div class="flex gap-4">
+      <div class="flex-1">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          placeholder="Search books by title..."
+          class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+      <button
+        (click)="onSearch()"
+        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+      >
+        Search
+      </button>
+      @if (searchQuery()) {
+        <button
+          (click)="clearSearch()"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+        >
+          Clear
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (booksService.isLoading()) {
+    <app-loading-spinner message="Loading books..." containerClass="py-12" />
+  } @else if (booksService.error()) {
+    <div class="bg-red-50 border border-red-200 rounded-md p-4">
+      <p class="text-red-600">{{ booksService.error() }}</p>
+      <button (click)="booksService.loadBooks()" class="mt-2 text-red-700 underline">
+        Try again
+      </button>
+    </div>
+  } @else if (booksService.books().length === 0) {
+    <div class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No books found</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        @if (searchQuery()) {
+          No books match your search criteria.
+        } @else {
+          Get started by creating a new book.
+        }
+      </p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (book of booksService.books(); track book.id) {
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+              <a [routerLink]="['/books', book.id]" class="hover:text-indigo-600">
+                {{ book.title }}
+              </a>
+            </h3>
+            @if (book.author) {
+              <p class="text-sm text-gray-600 mb-2">
+                by {{ book.author.name }}
+              </p>
+            }
+            <p class="text-sm text-gray-500 mb-4">
+              ISBN: {{ book.isbn }}
+            </p>
+            @if (book.description) {
+              <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                {{ book.description }}
+              </p>
+            }
+            <div class="flex items-center justify-between">
+              <span class="text-lg font-bold text-indigo-600">
+                {{ book.price | currency }}
+              </span>
+              <div class="flex space-x-2">
+                <a
+                  [routerLink]="['/books', book.id]"
+                  class="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                >
+                  View
+                </a>
+                @if (authService.isAdmin()) {
+                  <a
+                    [routerLink]="['/books', book.id, 'edit']"
+                    class="text-green-600 hover:text-green-800 text-sm font-medium"
+                  >
+                    Edit
+                  </a>
+                  <button
+                    (click)="openDeleteDialog(book)"
+                    class="text-red-600 hover:text-red-800 text-sm font-medium"
+                  >
+                    Delete
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-confirmation-dialog
+  [isOpen]="deleteDialogOpen()"
+  title="Delete Book"
+  [message]="'Are you sure you want to delete \'' + (bookToDelete()?.title || '') + '\'? This action cannot be undone.'"
+  confirmText="Delete"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

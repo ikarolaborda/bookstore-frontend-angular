@@ -1,0 +1,110 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  @if (booksService.isLoading()) {
+    <app-loading-spinner message="Loading book details..." containerClass="py-12" />
+  } @else if (booksService.selectedBook(); as book) {
+    <div class="mb-6">
+      <a routerLink="/books" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Books
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="p-8">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ book.title }}</h1>
+            @if (book.author) {
+              <p class="mt-2 text-lg text-gray-600">
+                by
+                <a [routerLink]="['/authors', book.author.id]" class="text-indigo-600 hover:text-indigo-800">
+                  {{ book.author.name }}
+                </a>
+              </p>
+            }
+          </div>
+          <span class="text-3xl font-bold text-indigo-600">
+            {{ book.price | currency }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">ISBN</h3>
+            <p class="mt-1 text-lg text-gray-900">{{ book.isbn }}</p>
+          </div>
+          @if (book.publishedDate) {
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Published Date</h3>
+              <p class="mt-1 text-lg text-gray-900">{{ book.publishedDate | date }}</p>
+            </div>
+          }
+        </div>
+
+        @if (book.description) {
+          <div class="mb-8">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Description</h3>
+            <p class="text-gray-700 leading-relaxed">{{ book.description }}</p>
+          </div>
+        }
+
+        @if (book.stores && book.stores.length > 0) {
+          <div class="mb-8">
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Available at</h3>
+            <div class="flex flex-wrap gap-2">
+              @for (store of book.stores; track store.id) {
+                <a
+                  [routerLink]="['/stores', store.id]"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
+                >
+                  {{ store.name }}
+                </a>
+              }
+            </div>
+          </div>
+        }
+
+        @if (authService.isAdmin()) {
+          <div class="flex space-x-4 pt-6 border-t border-gray-200">
+            <a
+              [routerLink]="['/books', book.id, 'edit']"
+              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit Book
+            </a>
+            <button
+              (click)="openDeleteDialog()"
+              class="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50"
+            >
+              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete Book
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-12">
+      <p class="text-gray-500">Book not found</p>
+      <a routerLink="/books" class="mt-4 text-indigo-600 hover:text-indigo-800">
+        Return to books list
+      </a>
+    </div>
+  }
+</div>
+
+<app-confirmation-dialog
+  [isOpen]="deleteDialogOpen()"
+  title="Delete Book"
+  [message]="'Are you sure you want to delete \'' + (booksService.selectedBook()?.title || '') + '\'? This action cannot be undone.'"
+  confirmText="Delete"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>

@@ -1,0 +1,47 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <a routerLink="/authors" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+      <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Authors
+    </a>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md p-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ isEditMode() ? 'Edit Author' : 'Add New Author' }}</h1>
+
+    @if (errorMessage()) {
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+        <p class="text-red-600">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <form [formGroup]="authorForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Name *</label>
+        <input type="text" id="name" formControlName="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+        @if (authorForm.get('name')?.invalid && authorForm.get('name')?.touched) {
+          <p class="mt-1 text-sm text-red-600">Name is required (min 2 characters)</p>
+        }
+      </div>
+
+      <div>
+        <label for="birthDate" class="block text-sm font-medium text-gray-700">Birth Date</label>
+        <input type="date" id="birthDate" formControlName="birthDate" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
+
+      <div>
+        <label for="biography" class="block text-sm font-medium text-gray-700">Biography</label>
+        <textarea id="biography" formControlName="biography" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-4 pt-6">
+        <a routerLink="/authors" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">Cancel</a>
+        <button type="submit" [disabled]="authorForm.invalid || isSubmitting()" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50">
+          {{ isEditMode() ? 'Update Author' : 'Create Author' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

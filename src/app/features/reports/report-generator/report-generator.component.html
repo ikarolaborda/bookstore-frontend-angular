@@ -1,0 +1,82 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Reports</h1>
+    <p class="mt-1 text-sm text-gray-500">Generate and download reports in various formats</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+      <p class="text-red-600">{{ errorMessage() }}</p>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
+      <p class="text-green-600">{{ successMessage() }}</p>
+    </div>
+  }
+
+  <div class="bg-white rounded-lg shadow-md p-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-6">Books Report</h2>
+
+    <div class="mb-8">
+      <label class="block text-sm font-medium text-gray-700 mb-4">Select Format</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        @for (format of formats; track format) {
+          <label
+            class="relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"
+            [class.border-indigo-500]="selectedFormat() === format"
+            [class.ring-2]="selectedFormat() === format"
+            [class.ring-indigo-500]="selectedFormat() === format"
+            [class.border-gray-300]="selectedFormat() !== format"
+          >
+            <input
+              type="radio"
+              name="format"
+              [value]="format"
+              [(ngModel)]="selectedFormat"
+              class="sr-only"
+            />
+            <span class="flex flex-1">
+              <span class="flex flex-col">
+                <span class="block text-sm font-medium text-gray-900">{{ format }}</span>
+                <span class="mt-1 flex items-center text-sm text-gray-500">
+                  {{ getFormatDescription(format) }}
+                </span>
+              </span>
+            </span>
+            <svg
+              class="h-5 w-5 text-indigo-600"
+              [class.invisible]="selectedFormat() !== format"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          </label>
+        }
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button
+        (click)="generateReport()"
+        [disabled]="reportsService.isLoading()"
+        class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        @if (reportsService.isLoading()) {
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Generating...
+        } @else {
+          <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download Report
+        }
+      </button>
+    </div>
+  </div>
+</div>
